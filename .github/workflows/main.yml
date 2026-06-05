@@ -1,4 +1,4 @@
-name: Build Flet APK
+name: Build APK
 on:
   push:
     branches: [ main, master ]
@@ -8,36 +8,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Setup Java (Требуется для Android)
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: '17'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flet requests
 
-    - name: Accept Android Licenses
-      run: |
-        yes | sdkmanager --licenses || true
+      - name: Build APK non-interactively
+        run: |
+          yes | flet build apk
 
-    - name: Install Flet and Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flet flet-cli requests
-
-    - name: Build APK
-      run: |
-        # Команда yes автоматически введет 'y' на любые интерактивные вопросы Flet
-        yes | flet build apk --verbose
-
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: gemini-app-release
-        path: build/apk/*.apk
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/apk/*.apk
